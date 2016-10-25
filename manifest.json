@@ -1,23 +1,16 @@
 {
-    "name": "ARC cookie exchange",
-    "version": "0.0.1",
-    "description": "An extension that supports Advanced REST Client session management reading Chrome cookies.",
-    "permissions": [
-        "cookies",
-        "http://*/*",
-        "https://*/*"
-    ],
-    "icons": {
+   "background": {
+      "scripts": [ "script/payload-parser.js", "script/background.js" ]
+   },
+   "description": "An extension that supports Advanced REST Client session management reading Chrome cookies.",
+   "icons": {
+      "128": "assets/arc-exchange-icon-128.png",
       "48": "assets/arc-exchange-icon-48.png",
-      "64": "assets/arc-exchange-icon-64.png",
-      "128": "assets/arc-exchange-icon-128.png"
-    },
-    "background": {
-        "scripts": [
-          "script/payload-parser.js",
-          "script/background.js"
-        ]
-    },
-    "manifest_version": 2,
-    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmRD5D/XD0sgjfatykuVJo9qiePUMqVXV0tfqFLzN7PHKexRPguimUEQcGKRvbSJVr8fQkSNNNwJgvZHezkXR7wJrsLlY9Hjz11IFCutzoCpuYcUYyfVmwnI+K5oH5wMoktmNUy+fWtMGeNXCJ25lsVFOACdxUZUWYNSEK1e8PzOhMbnrYxiFibiwgiagrwhasW7ToeoiX0tvBvxR274jTUPtWE+zJ6cljKp+S149VKeGLtai2jAr1MkyKp9Ui8nR43Is4GKUGVferyYsgPHUasr//03vg8/l47VwcJoPiMqC4nmqJt3crq7Hye6LjUrq2tb3NiCh4tdhCp1GXrPysQIDAQAB"
+      "64": "assets/arc-exchange-icon-64.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmRD5D/XD0sgjfatykuVJo9qiePUMqVXV0tfqFLzN7PHKexRPguimUEQcGKRvbSJVr8fQkSNNNwJgvZHezkXR7wJrsLlY9Hjz11IFCutzoCpuYcUYyfVmwnI+K5oH5wMoktmNUy+fWtMGeNXCJ25lsVFOACdxUZUWYNSEK1e8PzOhMbnrYxiFibiwgiagrwhasW7ToeoiX0tvBvxR274jTUPtWE+zJ6cljKp+S149VKeGLtai2jAr1MkyKp9Ui8nR43Is4GKUGVferyYsgPHUasr//03vg8/l47VwcJoPiMqC4nmqJt3crq7Hye6LjUrq2tb3NiCh4tdhCp1GXrPysQIDAQAB",
+   "manifest_version": 2,
+   "name": "ARC cookie exchange",
+   "permissions": [ "cookies", "http://*/*", "https://*/*" ],
+   "version": "0.0.3"
 }

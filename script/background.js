@@ -79,6 +79,7 @@ class CookieExchange {
   // Set up the listeners to listen for external clients.
   setUp() {
     chrome.runtime.onConnectExternal.addListener(this.externalConnectListener);
+    this.notifyExtensionLoaded();
   }
   // Connection from other clients will be rejected. This is ARC only extension.
   get allowedClients() {
@@ -120,8 +121,19 @@ class CookieExchange {
     });
   }
 
+  // Botify running apps that the extension hass been loaded.
+  notifyExtensionLoaded() {
+    var ids = [
+      'ffgciingieijajcbpkockcbknajffbel',
+      'okeafnfmgoafdfbcjkanpgmjanccpell',
+      'epgngalmiadbjnoompchcohonhidjanm',
+      'hgmloofddffdnphfgcellkdfbfbjeloo'
+    ];
+    ids.forEach((i) => chrome.runtime.sendMessage(i, {loaded: true}));
+  }
+
   _clientConnected(port) {
-    console.log('Client connected', port);
+    // console.log('Client connected', port);
 
     if (!port.sender || !port.sender.id) {
       console.warn('Unauthorized.');
@@ -199,14 +211,17 @@ class CookieExchange {
   _proxyXhr(port, request) {
     var log = [];
     var errorFn = (e) => {
+      // console.dir(e);
       let rtn = {
         'error': true,
         'log': log,
-        'message': e.message
+        'message': e.message || 'Network error.',
+        payload: 'proxy-xhr'
       };
       port.postMessage(rtn);
     };
-
+    var startTime = 0;
+    var startDate = Date.now();
     var xhr = new XMLHttpRequest();
     try {
       xhr.open(request.method, request.url, true);
@@ -216,7 +231,29 @@ class CookieExchange {
     }
 
     var loadFn = (e) => {
+      let loadTime = window.performance.now() - startTime;
       let t = e.target;
+      let headers = t.getAllResponseHeaders();
+      let authData;
+      if (t.status === 401) {
+        let list = headers.split('\n');
+        let _auth = list.find((i) => i.toLowerCase().indexOf('www-authenticate') !== -1);
+        if (_auth) {
+          _auth = _auth.toLowerCase();
+          if (_auth.indexOf('basic') !== -1) {
+            authData = {
+              method: 'basic'
+            };
+          }
+          //  else if (_auth.indexOf('ntlm') !== -1) {
+          //   authData = {
+          //     method: 'ntlm'
+          //   };
+          // }
+        }
+      }
+
+
       let rtn = {
         response: {
           response: t.response,
@@ -225,11 +262,21 @@ class CookieExchange {
           responseURL: t.responseURL,
           status: t.status,
           statusText: t.statusText,
-          readyState: t.readyState
+          readyState: t.readyState,
+          headers: t.getAllResponseHeaders(),
+          stats: {
+            receive: loadTime,
+            startTime: startDate
+          }
         },
         log: log,
         payload: 'proxy-xhr'
       };
+
+      if (authData) {
+        rtn.auth = authData;
+      }
+
       console.log('Response ready.', rtn);
       port.postMessage(rtn);
     };
@@ -276,7 +323,9 @@ class CookieExchange {
     }
     xhr.addEventListener('load', loadFn);
     xhr.addEventListener('error', errorFn);
+    xhr.addEventListener('timeout', errorFn);
     try {
+      startTime = window.performance.now();
       xhr.send(data);
     } catch(e) {
       errorFn(e);
