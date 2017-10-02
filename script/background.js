@@ -150,7 +150,7 @@ class CookieExchange {
     var rmPortFn = () => {
       port.onMessage.removeListener(fn);
       port.onDisconnect.removeListener(rmPortFn);
-      for (let i = this.clients.length - 1; i <= 0; i--) {
+      for (let i = this.clients.length - 1; i >= 0; i--) {
         if (this.clients[i] === port) {
           this.clients.splice(i, 1);
           break;
