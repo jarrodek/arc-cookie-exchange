@@ -11,7 +11,7 @@ class PayloadParser {
     if (!str || typeof str !== 'string') {
       return result;
     }
-    var list = Array.from(String(result).trim())
+    var list = Array.from(String(result).trim());
     var state = 0; // means searching for a key, 1 - value.
     var key = '';
     var value = '';

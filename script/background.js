@@ -2,70 +2,70 @@
 
 // An object used for caching data about the browser's cookies.
 class CookieCache {
-    constructor() {
-        this.cookies_ = {};
+  constructor() {
+    this.cookies_ = {};
+  }
+  // Clears all cached cookies.
+  reset() {
+    this.cookies_ = {};
+  }
+  // Adds cookie to the cache.
+  add(cookie) {
+    var domain = cookie.domain;
+    if (!this.cookies_[domain]) {
+      this.cookies_[domain] = [];
     }
-    // Clears all cached cookies.
-    reset() {
-        this.cookies_ = {};
-    }
-    // Adds cookie to the cache.
-    add(cookie) {
-        var domain = cookie.domain;
-        if (!this.cookies_[domain]) {
-            this.cookies_[domain] = [];
+    this.cookies_[domain].push(cookie);
+  }
+  // Removes cookie from the cache.
+  remove(cookie) {
+    var domain = cookie.domain;
+    if (this.cookies_[domain]) {
+      var i = 0;
+      while (i < this.cookies_[domain].length) {
+        if (CookieCache.cookieMatch(this.cookies_[domain][i], cookie)) {
+          this.cookies_[domain].splice(i, 1);
+        } else {
+          i++;
         }
-        this.cookies_[domain].push(cookie);
+      }
+      if (this.cookies_[domain].length === 0) {
+        delete this.cookies_[domain];
+      }
     }
-    // Removes cookie from the cache.
-    remove(cookie) {
-        var domain = cookie.domain;
-        if (this.cookies_[domain]) {
-            var i = 0;
-            while (i < this.cookies_[domain].length) {
-                if (CookieCache.cookieMatch(this.cookies_[domain][i], cookie)) {
-                    this.cookies_[domain].splice(i, 1);
-                } else {
-                    i++;
-                }
-            }
-            if (this.cookies_[domain].length == 0) {
-                delete this.cookies_[domain];
-            }
-        }
-    }
-    // Gets all cookies stored in cache.
-    getAll() {
-      return this.cookies_;
-    }
-    // Gets all domains for which the cookie exists.
-    getDomains(filter) {
-        var result = [];
-        CookieCache.sortedKeys(this.cookies_).forEach(function(domain) {
-            if (!filter || domain.indexOf(filter) !== -1) {
-                result.push(domain);
-            }
-        });
-        return result;
-    }
-    // Gets cookies for given domain.
-    getCookies(domain) {
-        return this.cookies_[domain];
-    }
+  }
+  // Gets all cookies stored in cache.
+  getAll() {
+    return this.cookies_;
+  }
+  // Gets all domains for which the cookie exists.
+  getDomains(filter) {
+    var result = [];
+    CookieCache.sortedKeys(this.cookies_).forEach(function(domain) {
+      if (!filter || domain.indexOf(filter) !== -1) {
+        result.push(domain);
+      }
+    });
+    return result;
+  }
+  // Gets cookies for given domain.
+  getCookies(domain) {
+    return this.cookies_[domain];
+  }
 
-    //Compares cookies for "key" (name, domain, etc.) equality, but not "value" equality.
-    static cookieMatch(c1, c2) {
-        return (c1.name == c2.name) && (c1.domain == c2.domain) &&
-            (c1.hostOnly == c2.hostOnly) && (c1.path == c2.path) &&
-            (c1.secure == c2.secure) && (c1.httpOnly == c2.httpOnly) &&
-            (c1.session == c2.session) && (c1.storeId == c2.storeId);
-    }
-    // Returns an array of sorted keys from an associative array.
-    static sortedKeys(array) {
-        var keys = Object.keys(array);
-        keys.sort();
-        return keys;
-    }
+  //Compares cookies for "key" (name, domain, etc.) equality, but not "value" equality.
+  static cookieMatch(c1, c2) {
+    return (c1.name === c2.name) && (c1.domain === c2.domain) &&
+      (c1.hostOnly === c2.hostOnly) && (c1.path === c2.path) &&
+      (c1.secure === c2.secure) && (c1.httpOnly === c2.httpOnly) &&
+      (c1.session === c2.session) && (c1.storeId === c2.storeId);
+  }
+  // Returns an array of sorted keys from an associative array.
+  static sortedKeys(array) {
+    var keys = Object.keys(array);
+    keys.sort();
+    return keys;
+  }
 }
 
 // Main extension object.
@@ -129,7 +129,9 @@ class CookieExchange {
       'epgngalmiadbjnoompchcohonhidjanm',
       'hgmloofddffdnphfgcellkdfbfbjeloo'
     ];
-    ids.forEach((i) => chrome.runtime.sendMessage(i, {loaded: true}));
+    ids.forEach((i) => chrome.runtime.sendMessage(i, {
+      loaded: true
+    }));
   }
 
   _clientConnected(port) {
@@ -204,7 +206,9 @@ class CookieExchange {
   // Inform all listeners that the cookie has changed.
   _informCookieChanged() {
     this.clients.forEach((port) => {
-      port.postMessage({payload: 'cookie-changed'});
+      port.postMessage({
+        payload: 'cookie-changed'
+      });
     });
   }
 
@@ -225,7 +229,7 @@ class CookieExchange {
     var xhr = new XMLHttpRequest();
     try {
       xhr.open(request.method, request.url, true);
-    } catch(e) {
+    } catch (e) {
       errorFn(e);
       return;
     }
@@ -245,14 +249,8 @@ class CookieExchange {
               method: 'basic'
             };
           }
-          //  else if (_auth.indexOf('ntlm') !== -1) {
-          //   authData = {
-          //     method: 'ntlm'
-          //   };
-          // }
         }
       }
-
 
       let rtn = {
         response: {
@@ -291,10 +289,10 @@ class CookieExchange {
         } catch (e) {
           log.push(`Can't set header ${i.name} in the XHR call. Try socket connection.`);
         }
-      })
+      });
     }
     //var the_file = new Blob([window.atob(png)],  {type: 'image/png', encoding: 'utf-8'});
-    var data = undefined;
+    var data;
     if (['get', 'head'].indexOf(request.method.toLowerCase()) === -1) {
       if (request.files && request.files.length) {
         let fd = new FormData();
@@ -310,7 +308,10 @@ class CookieExchange {
         request.files.forEach((f) => {
           let files = f.files;
           for (let i = 0, len = files.length; i < len; i++) {
-            let file = new Blob([atob(files[i].file)],  {type: files[i].mime, encoding: 'utf-8'});
+            let file = new Blob([atob(files[i].file)], {
+              type: files[i].mime,
+              encoding: 'utf-8'
+            });
             fd.append(f.name, file);
           }
         });
@@ -327,7 +328,7 @@ class CookieExchange {
     try {
       startTime = window.performance.now();
       xhr.send(data);
-    } catch(e) {
+    } catch (e) {
       errorFn(e);
       return;
     }
