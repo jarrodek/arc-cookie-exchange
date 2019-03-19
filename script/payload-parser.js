@@ -7,15 +7,15 @@ class PayloadParser {
    * @return {Array<Object>} An array of objects with "name" and "value" keys.
    */
   static parseString(str) {
-    var result = [];
+    const result = [];
     if (!str || typeof str !== 'string') {
       return result;
     }
-    var list = Array.from(String(result).trim());
-    var state = 0; // means searching for a key, 1 - value.
-    var key = '';
-    var value = '';
-    var tempObj = {};
+    const list = Array.from(String(result).trim());
+    let state = 0; // means searching for a key, 1 - value.
+    let key = '';
+    let value = '';
+    let tempObj = {};
     while (true) {
       let ch = list.shift();
       if (ch === undefined) {

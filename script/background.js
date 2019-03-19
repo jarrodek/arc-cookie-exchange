@@ -11,7 +11,7 @@ class CookieCache {
   }
   // Adds cookie to the cache.
   add(cookie) {
-    var domain = cookie.domain;
+    const domain = cookie.domain;
     if (!this.cookies_[domain]) {
       this.cookies_[domain] = [];
     }
@@ -19,9 +19,9 @@ class CookieCache {
   }
   // Removes cookie from the cache.
   remove(cookie) {
-    var domain = cookie.domain;
+    const domain = cookie.domain;
     if (this.cookies_[domain]) {
-      var i = 0;
+      let i = 0;
       while (i < this.cookies_[domain].length) {
         if (CookieCache.cookieMatch(this.cookies_[domain][i], cookie)) {
           this.cookies_[domain].splice(i, 1);
@@ -40,7 +40,7 @@ class CookieCache {
   }
   // Gets all domains for which the cookie exists.
   getDomains(filter) {
-    var result = [];
+    const result = [];
     CookieCache.sortedKeys(this.cookies_).forEach(function(domain) {
       if (!filter || domain.indexOf(filter) !== -1) {
         result.push(domain);
@@ -53,7 +53,7 @@ class CookieCache {
     return this.cookies_[domain];
   }
 
-  //Compares cookies for "key" (name, domain, etc.) equality, but not "value" equality.
+  // Compares cookies for "key" (name, domain, etc.) equality, but not "value" equality.
   static cookieMatch(c1, c2) {
     return (c1.name === c2.name) && (c1.domain === c2.domain) &&
       (c1.hostOnly === c2.hostOnly) && (c1.path === c2.path) &&
@@ -62,7 +62,7 @@ class CookieCache {
   }
   // Returns an array of sorted keys from an associative array.
   static sortedKeys(array) {
-    var keys = Object.keys(array);
+    const keys = Object.keys(array);
     keys.sort();
     return keys;
   }
@@ -78,6 +78,7 @@ class CookieExchange {
   }
   // Set up the listeners to listen for external clients.
   setUp() {
+    /* global chrome */
     chrome.runtime.onConnectExternal.addListener(this.externalConnectListener);
     this.notifyExtensionLoaded();
   }
@@ -115,15 +116,15 @@ class CookieExchange {
 
   load() {
     chrome.cookies.getAll({}, (cookies) => {
-      for (let i in cookies) {
+      Object.keys(cookies).forEach((i) => {
         this.cache.add(cookies[i]);
-      }
+      });
     });
   }
 
   // Botify running apps that the extension hass been loaded.
   notifyExtensionLoaded() {
-    var ids = [
+    const ids = [
       'ffgciingieijajcbpkockcbknajffbel',
       'okeafnfmgoafdfbcjkanpgmjanccpell',
       'epgngalmiadbjnoompchcohonhidjanm',
@@ -146,10 +147,10 @@ class CookieExchange {
       return;
     }
 
-    var fn = (msg) => {
+    const fn = (msg) => {
       this._processMessage(port, msg);
     };
-    var rmPortFn = () => {
+    const rmPortFn = () => {
       port.onMessage.removeListener(fn);
       port.onDisconnect.removeListener(rmPortFn);
       for (let i = this.clients.length - 1; i >= 0; i--) {
@@ -188,20 +189,19 @@ class CookieExchange {
     switch (msg.payload) {
       case 'get-cookies':
         port.postMessage({
-          'payload': 'get-cookies',
-          'cookies': this.cache.getAll()
+          payload: 'get-cookies',
+          cookies: this.cache.getAll()
         });
         break;
       case 'proxy-xhr':
-        this._proxyXhr(port, msg.request);
+        this._proxyXhr(port, msg.request, msg.id);
         break;
       default:
         port.postMessage({
-          'payload': 'unknown'
+          payload: 'unknown'
         });
         break;
     }
-    console.log('message from client', msg);
   }
   // Inform all listeners that the cookie has changed.
   _informCookieChanged() {
@@ -212,21 +212,21 @@ class CookieExchange {
     });
   }
 
-  _proxyXhr(port, request) {
-    var log = [];
-    var errorFn = (e) => {
-      // console.dir(e);
-      let rtn = {
-        'error': true,
-        'log': log,
-        'message': e.message || 'Network error.',
-        payload: 'proxy-xhr'
+  _proxyXhr(port, request, id) {
+    const log = [];
+    const errorFn = (e) => {
+      const rtn = {
+        error: true,
+        log: log,
+        message: e.message || 'Network error.',
+        payload: 'proxy-xhr',
+        id
       };
       port.postMessage(rtn);
     };
-    var startTime = 0;
-    var startDate = Date.now();
-    var xhr = new XMLHttpRequest();
+    let startTime = 0;
+    const startDate = Date.now();
+    const xhr = new XMLHttpRequest();
     try {
       xhr.open(request.method, request.url, true);
     } catch (e) {
@@ -234,7 +234,7 @@ class CookieExchange {
       return;
     }
 
-    var loadFn = (e) => {
+    const loadFn = (e) => {
       let loadTime = window.performance.now() - startTime;
       let t = e.target;
       let headers = t.getAllResponseHeaders();
@@ -252,7 +252,7 @@ class CookieExchange {
         }
       }
 
-      let rtn = {
+      const rtn = {
         response: {
           response: t.response,
           responseText: t.responseText,
@@ -268,19 +268,19 @@ class CookieExchange {
           }
         },
         log: log,
-        payload: 'proxy-xhr'
+        payload: 'proxy-xhr',
+        id
       };
 
       if (authData) {
         rtn.auth = authData;
       }
 
-      console.log('Response ready.', rtn);
       port.postMessage(rtn);
     };
 
     // set headers
-    var h = request.headers;
+    const h = request.headers;
     if (h instanceof Array) {
       log.push('Setting up headers. (' + h.length + ' headers to add)');
       h.forEach((i) => {
@@ -291,8 +291,8 @@ class CookieExchange {
         }
       });
     }
-    //var the_file = new Blob([window.atob(png)],  {type: 'image/png', encoding: 'utf-8'});
-    var data;
+    // var the_file = new Blob([window.atob(png)],  {type: 'image/png', encoding: 'utf-8'});
+    let data;
     if (['get', 'head'].indexOf(request.method.toLowerCase()) === -1) {
       if (request.files && request.files.length) {
         let fd = new FormData();
@@ -335,5 +335,5 @@ class CookieExchange {
   }
 }
 
-var exchange = new CookieExchange();
+const exchange = new CookieExchange();
 exchange.setUp();
